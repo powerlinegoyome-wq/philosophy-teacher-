@@ -7,19 +7,32 @@ on:
   repository_dispatch:
     types: [run-bot]
 
+# Aynı anda sadece bir botun çalışmasını sağlar. 
+# Yeni tetikleme geldiğinde eğer eski bot hala açıksa onu otomatik iptal eder.
+concurrency:
+  group: kick-bot
+  cancel-in-progress: true
+
 jobs:
   kontrol:
     runs-on: ubuntu-latest
+    # Botun 4 dakikadan fazla sürmesine izin vermez. 
+    # Böylece her 5 dakikada bir gelecek olan yeni işe yer açılır.
+    timeout-minutes: 4 
+    
     steps:
       - name: Repo'yu indir
         uses: actions/checkout@v4
+        
       - name: Python kur
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Gerekli paketleri yükle
+          
+      - name: Gerekli paketleri yukle
         run: pip install requests
-      - name: Botu çalıştır
+        
+      - name: Botu calistir
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_GROUP_ID: ${{ secrets.TELEGRAM_GROUP_ID }}
